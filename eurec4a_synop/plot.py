@@ -1,32 +1,31 @@
 import warnings
-import datetime
+import datetime as dt
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 
 
 def add_synop(ax, date, image_path="../cropped/"):
-    if isinstance(date, datetime.datetime):
+    if isinstance(date, dt.datetime):
         warnings.warn(
             "You provided a `datetime` to `add_synop`, but because synoptic"
             " charts are only available at 00:00UTC the nearest time to midnight"
             " will be used"
         )
-        date = 
+        date = _nearest_midnight(date)
     fn = Path(image_path) / f"{date:%Y%m%d000000}.png"
     im = plt.imread(fn)
 
     ax.imshow(im, extent=[-100, -10, 0, 35], transform=ccrs.PlateCarree())
 
 
-def round_time(dt=None, roundTo=60):
-   """Round a datetime object to any time lapse in seconds
-   dt : datetime.datetime object, default now.
-   roundTo : Closest number of seconds to round to, default 1 minute.
+def _nearest_midnight(t):
+    current = dt.datetime.now()
+    current_td = dt.timedelta(
+        hours=current.hour,
+        minutes=current.minute,
+        seconds=current.second,
+        microseconds=current.microsecond,
+    )
 
-   Author: Thierry Husson 2012 - Use it as you want but don't blame me.
-   source https://stackoverflow.com/a/10854034/271776
-   """
-   if dt == None : dt = datetime.datetime.now()
-   seconds = (dt.replace(tzinfo=None) - dt.min).seconds
-   rounding = (seconds+roundTo/2) // roundTo * roundTo
-   return dt + datetime.timedelta(0,rounding-seconds,-dt.microsecond)
+    to_midnight = dt.timedelta(hours=round(current_td.total_seconds() / (60 * 60 * 24)))
+    return dt.datetime.combine(current, dt.time(0)) + to_midnight
