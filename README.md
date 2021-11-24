@@ -34,4 +34,8 @@ ax.gridlines(draw_labels=True)
 
 ```
 
-![](docs/example_plot.png)
+![example chart](docs/example_plot.png)
+
+## Chart symbols
+
+![chart symbols](docs/chart_symbols.png)
